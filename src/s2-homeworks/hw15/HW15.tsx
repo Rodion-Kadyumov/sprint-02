@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import s2 from '../../s1-main/App.module.css'
 import s from './HW15.module.css'
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 import SuperPagination from './common/c9-SuperPagination/SuperPagination'
 import { useSearchParams } from 'react-router-dom'
 import SuperSort from './common/c10-SuperSort/SuperSort'
-import { Loader } from "../hw10/Loader";
 
 type TechType = {
   id: number
@@ -19,12 +18,7 @@ type ParamsType = {
   count: number
 }
 
-interface ApiResponse {
-  techs: TechType[];
-  totalCount: number;
-}
-
-const getTechs = (params: ParamsType): Promise<void | AxiosResponse<ApiResponse>> => {
+const getTechs = (params: ParamsType) => {
   return axios
     .get<{ techs: TechType[], totalCount: number }>(
       'https://samurai.it-incubator.io/api/3.0/homework/test3',
@@ -47,30 +41,26 @@ const HW15 = () => {
   const sendQuery = (params: any) => {
     setLoading(true)
     getTechs(params)
-      .then((res) => {
-        if (res?.data) {
-          setTechs(res.data.techs);
-          setTotalCount(res.data.totalCount);
-          setLoading(false);
-        }
+      .then((res: any) => {
+        setTechs(res.data.techs)
+        setTotalCount(res.data.totalCount) // 36
+        setLoading(false)
       })
+
   }
 
   const onChangePagination = (newPage: number, newCount: number) => {
     setPage(newPage)
     setCount(newCount)
-    sendQuery({ page: newPage.toString(), count: newCount.toString() })
-    setSearchParams({ page: newPage.toString(), count: newCount.toString() });
+    sendQuery({ page: newPage, count: newCount })
+    setSearchParams({ page: String(newPage) })
   }
 
   const onChangeSort = (newSort: string) => {
-    
-    console.log(newSort)
     setSort(newSort)
-    setPage(1);
-    const params = Object.fromEntries(searchParams)
-    sendQuery({ ...params, page: page, sort: newSort });
-    setSearchParams({ ...params, page: page.toString(), sort: newSort });
+    setPage(1)
+    sendQuery({ page: String(page), count: String(count), sort: newSort })
+    setSearchParams({ page: String(page), sort: newSort })
   }
 
   useEffect(() => {
@@ -97,8 +87,7 @@ const HW15 = () => {
       <div className={s2.hwTitle}>Homework #15</div>
 
       <div className={s2.hw}>
-        {idLoading && <div id={'hw15-loading'} className={s.loading}></div>}
-
+        {idLoading && <div id={'hw15-loading'} className={s.loading}>Loading...</div>}
         <SuperPagination
           page={page}
           itemsCountForPage={count}
